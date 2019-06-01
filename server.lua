@@ -4,13 +4,6 @@ local peacetime = 0
 local priority = false
 local status = true
 
-RegisterNetEvent("aop:UpdateClientAOP")
-AddEventHandler("aop:UpdateClientAOP", function()
-    currentzone.name = currentzonename
-    TriggerClientEvent('aop:InitializeAOP', source, currentzone)
-    TriggerClientEvent("aop:UpdateInformation", source, {peacetime, priority})
-end)
-
 Citizen.CreateThread(function()
     while true do
         if (peacetime > 0) then
@@ -19,6 +12,28 @@ Citizen.CreateThread(function()
         end
         Citizen.Wait(1000)
     end
+end)
+
+local function isAdmin(source)
+    local allowed = false
+    for i,id in ipairs(config.admins) do
+        for x,pid in ipairs(GetPlayerIdentifiers(source)) do
+            if string.lower(pid) == string.lower(id) then
+                allowed = true
+            end
+        end
+	end
+	if IsPlayerAceAllowed(source, "lance.aop") then
+		allowed = true
+	end
+    return allowed
+end
+
+RegisterNetEvent("aop:UpdateClientAOP")
+AddEventHandler("aop:UpdateClientAOP", function()
+    currentzone.name = currentzonename
+    TriggerClientEvent('aop:InitializeAOP', source, currentzone)
+    TriggerClientEvent("aop:UpdateInformation", source, {peacetime, priority})
 end)
 
 RegisterCommand("aop", function(source, args, rawCommand)
@@ -79,18 +94,3 @@ RegisterCommand("aop", function(source, args, rawCommand)
         end
     end
 end, false) -- set this to false to allow anyone.
-
-local function isAdmin(source)
-    local allowed = false
-    for i,id in ipairs(config.admins) do
-        for x,pid in ipairs(GetPlayerIdentifiers(source)) do
-            if string.lower(pid) == string.lower(id) then
-                allowed = true
-            end
-        end
-	end
-	if IsPlayerAceAllowed(source, "lance.aop") then
-		allowed = true
-	end
-    return allowed
-end
